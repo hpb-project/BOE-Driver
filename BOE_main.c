@@ -1,6 +1,6 @@
 /*
  * This file is part of the BOE Ethernet driver for Linux.
- *
+ * Author: loushl
  * Copyright (C) 2018 HPB.  All rights reserved.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -43,3 +43,44 @@
 #include <net/inet6_hashtables.h>
 #include <linux/crash_dump.h>
 #include <net/udp_tunnel.h>
+
+#include "BOE_debug.h"
+#include "common.h"
+
+
+
+static const struct pci_device_id pci_ids[] = {
+	{ PCI_DEVICE(VENDOR_ID, DEV_ID), },
+}
+
+//pci struct
+static struct pci_driver boe_driver = {
+	.name     = KBUILD_MODNAME,
+	.id_table = boe_pci_tbl,
+	//pci device add
+	.probe    = init_one,
+	//pci device remove
+	.remove   = remove_one,
+	.shutdown = shutdown_one,
+	.err_handler = &boe_eeh,
+};
+/*module init */
+static int __init boe_init_module(void)
+{
+	int ret;
+
+	ret = pci_register_driver(&boe_driver);
+	if (ret < 0)
+		dbg_init(boe_debugfs_root);
+	return ret;
+}
+
+/*module exit*/
+static void __exit cxgb4_cleanup_module(void)
+{
+
+}
+
+module_init(boe_init_module);
+module_exit(boe_exit_module);
+
